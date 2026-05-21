@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沉淀溶解平衡 - 全景教学系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', 'Microsoft YaHei', sans-serif; overflow: hidden; }
+        .nav-item { transition: all 0.3s ease; }
+        .nav-item.active { background-color: #1e293b; border-left-color: #3b82f6; }
+        .nav-item:not(.active):hover { background-color: #334155; }
+        #loading-overlay { transition: opacity 0.3s ease; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white h-screen flex">
+
+    <!-- 侧边栏导航 -->
+    <aside class="w-64 bg-gray-800 flex flex-col border-r border-gray-700 shadow-xl z-20">
+        <div class="p-6 border-b border-gray-700 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-gray-100 tracking-wide">虚拟实验室</h1>
+                <p class="text-xs text-blue-400 font-medium">沉淀溶解平衡专题</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 py-4 overflow-y-auto">
+            <div class="px-4 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">实验模块</div>
+            
+            <button onclick="switchModule(1, this)" class="nav-item active w-full text-left px-6 py-4 border-l-4 border-blue-500 flex items-center gap-3 focus:outline-none">
+                <span class="text-xl">🧪</span>
+                <div>
+                    <div class="font-medium text-gray-200">实验一：宏观感知</div>
+                    <div class="text-xs text-gray-400 mt-0.5">探究沉淀的生成与悬浮</div>
+                </div>
+            </button>
+
+            <button onclick="switchModule(2, this)" class="nav-item w-full text-left px-6 py-4 border-l-4 border-transparent flex items-center gap-3 focus:outline-none">
+                <span class="text-xl">📈</span>
+                <div>
+                    <div class="font-medium text-gray-200">实验二：定量测定</div>
+                    <div class="text-xs text-gray-400 mt-0.5">电导率变化实时监测</div>
+                </div>
+            </button>
+
+            <button onclick="switchModule(3, this)" class="nav-item w-full text-left px-6 py-4 border-l-4 border-transparent flex items-center gap-3 focus:outline-none">
+                <span class="text-xl">⚛️</span>
+                <div>
+                    <div class="font-medium text-gray-200">实验三：微观本质</div>
+                    <div class="text-xs text-gray-400 mt-0.5">分子级水合离子交换</div>
+                </div>
+            </button>
+
+            <button onclick="switchModule(4, this)" class="nav-item w-full text-left px-6 py-4 border-l-4 border-transparent flex items-center gap-3 focus:outline-none">
+                <span class="text-xl">☢️</span>
+                <div>
+                    <div class="font-medium text-gray-200">实验四：动态验证</div>
+                    <div class="text-xs text-gray-400 mt-0.5">同位素示踪法探究</div>
+                </div>
+            </button>
+        </nav>
+        
+        <div class="p-4 border-t border-gray-700 text-center text-xs text-gray-500">
+            全景教学系统 v1.0
+        </div>
+    </aside>
+
+    <!-- 主实验区域 (Iframe沙盒) -->
+    <main class="flex-1 relative bg-black">
+        <!-- 加载遮罩 -->
+        <div id="loading-overlay" class="absolute inset-0 bg-gray-900 z-10 flex flex-col items-center justify-center pointer-events-none opacity-0">
+            <div class="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+            <div class="text-blue-400 font-medium tracking-widest text-sm">正在加载高精渲染引擎...</div>
+        </div>
+        
+        <iframe id="sim-frame" class="w-full h-full border-none" allow="autoplay; fullscreen"></iframe>
+    </main>
+
+    <!-- ================= 核心：原生代码模板区 ================= -->
+    <!-- 通过将 HTML 原封不动放在 template 标签中，确保代码安全隔离与标准解析 -->
+
+    <!-- 模块1: 氯化银.html -->
+    <template id="tpl-1">
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D虚拟仿真：探究沉淀溶解平衡</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #374151; font-family: 'Inter', system-ui, sans-serif; user-select: none; }
+        #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; cursor: grab; }
+        #canvas-container:active { cursor: grabbing; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; }
+        .interactive-ui { pointer-events: auto; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.05); } }
+        .drag-hint { animation: pulse 2s infinite; }
+        .floating-label { position: absolute; transform: translate(-50%, -50%); z-index: 5; pointer-events: none; transition: opacity 0.1s; }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div id="label-tube1" class="floating-label bg-white/90 backdrop-blur-sm text-center px-3 py-2 rounded-lg border border-blue-200 shadow-lg">
+        <div class="text-blue-800 font-bold text-sm border-b border-blue-100 pb-1 mb-1">1号试管</div><div class="text-gray-600 text-xs">2ml 氯化银上层清液</div>
+    </div>
+    <div id="label-tube2" class="floating-label bg-white/90 backdrop-blur-sm text-center px-3 py-2 rounded-lg border border-gray-300 shadow-lg">
+        <div class="text-gray-800 font-bold text-sm border-b border-gray-200 pb-1 mb-1">2号试管</div><div class="text-gray-600 text-xs">5ml 氯化钠溶液</div>
+    </div>
+    <div id="ui-layer" class="p-6">
+        <div class="flex justify-between items-start">
+            <div class="bg-white bg-opacity-95 rounded-xl p-5 shadow-2xl interactive-ui w-80 border-l-4 border-blue-500">
+                <h1 class="text-xl font-bold text-gray-800 mb-3">沉淀溶解平衡实验</h1>
+                <div class="p-3 bg-blue-50 rounded-lg text-sm text-blue-800 drag-hint border border-blue-200">
+                    <strong>操作指南：</strong><br>1. 按住鼠标拖动可360度旋转视角。<br>2. <span class="font-bold text-blue-600">拖拽右侧二号试管</span>到左侧一号试管上方，观察缓慢产生的悬浮微浑浊现象。
+                </div>
+            </div>
+            <div class="bg-white bg-opacity-95 rounded-xl p-4 shadow-2xl interactive-ui flex flex-col gap-2">
+                <button id="btn-reset" class="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium shadow-sm flex items-center gap-2 border border-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>清洗并重置实验
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x374151, 0.02);
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 7, 14);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        container.appendChild(renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; controls.dampingFactor = 0.05; controls.maxPolarAngle = Math.PI - 0.1; controls.minDistance = 2; controls.maxDistance = 30; controls.target.set(0, 3, 0);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); scene.add(ambientLight);
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.2); mainLight.position.set(5, 12, 4); mainLight.castShadow = true; mainLight.shadow.mapSize.width = 2048; mainLight.shadow.mapSize.height = 2048; mainLight.shadow.camera.near = 0.5; mainLight.shadow.camera.far = 25; mainLight.shadow.bias = -0.001; scene.add(mainLight);
+        const fillLight = new THREE.PointLight(0xaaccff, 0.8, 20); fillLight.position.set(-6, 4, -4); scene.add(fillLight);
+        const glassMaterial = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0.1, roughness: 0.02, transmission: 1.0, ior: 1.5, thickness: 0.1, clearcoat: 1.0, side: THREE.DoubleSide, transparent: true });
+        const clearLiquidMaterial = new THREE.MeshPhysicalMaterial({ color: 0xf5fafd, metalness: 0.0, roughness: 0.0, transmission: 1.0, ior: 1.33, transparent: true, opacity: 1.0 });
+        const liquid1Material = clearLiquidMaterial.clone(); const liquid2Material = clearLiquidMaterial.clone();
+        const tableMaterial = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.8 }); const woodMaterial = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.7 });
+        const tableGeo = new THREE.BoxGeometry(30, 1, 15); const table = new THREE.Mesh(tableGeo, tableMaterial); table.position.y = -0.5; table.receiveShadow = true; scene.add(table);
+        const rackWidth = 5; const rackDepth = 1.5; const rackHeight = 2.0;
+        const baseGeo = new THREE.BoxGeometry(rackWidth, 0.2, rackDepth); const baseMesh = new THREE.Mesh(baseGeo, woodMaterial); baseMesh.position.y = 0.1; baseMesh.castShadow = true; baseMesh.receiveShadow = true; scene.add(baseMesh);
+        const tubeRadius = 0.4; const tubeHeight = 3.5; const tube1X = -1.5; const tube2StartX = 1.5;
+        const shape = new THREE.Shape(); shape.moveTo(-rackWidth/2, -rackDepth/2); shape.lineTo(rackWidth/2, -rackDepth/2); shape.lineTo(rackWidth/2, rackDepth/2); shape.lineTo(-rackWidth/2, rackDepth/2); shape.lineTo(-rackWidth/2, -rackDepth/2);
+        const hole1 = new THREE.Path(); hole1.absarc(tube1X, 0, tubeRadius * 1.1, 0, Math.PI * 2, false); shape.holes.push(hole1);
+        const hole2 = new THREE.Path(); hole2.absarc(tube2StartX, 0, tubeRadius * 1.1, 0, Math.PI * 2, false); shape.holes.push(hole2);
+        const extrudeSettings = { depth: 0.2, bevelEnabled: false, curveSegments: 32 }; const topGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings); const topMesh = new THREE.Mesh(topGeo, woodMaterial); topMesh.rotation.x = Math.PI / 2; topMesh.position.y = rackHeight + 0.2; topMesh.castShadow = true; topMesh.receiveShadow = true; scene.add(topMesh);
+        const pillarGeo = new THREE.BoxGeometry(0.2, rackHeight, 0.2); const p1 = new THREE.Mesh(pillarGeo, woodMaterial); p1.position.set(-rackWidth/2 + 0.1, rackHeight/2 + 0.1, -rackDepth/2 + 0.1); const p2 = p1.clone(); p2.position.set(rackWidth/2 - 0.1, rackHeight/2 + 0.1, -rackDepth/2 + 0.1); const p3 = p1.clone(); p3.position.set(-rackWidth/2 + 0.1, rackHeight/2 + 0.1, rackDepth/2 - 0.1); const p4 = p1.clone(); p4.position.set(rackWidth/2 - 0.1, rackHeight/2 + 0.1, rackDepth/2 - 0.1); p1.castShadow = true; p2.castShadow = true; p3.castShadow = true; p4.castShadow = true; scene.add(p1); scene.add(p2); scene.add(p3); scene.add(p4);
+        const baseTubeY = 2.35;
+        function createTestTube(isInteractive = false) {
+            const group = new THREE.Group(); const cylinderGeo = new THREE.CylinderGeometry(tubeRadius, tubeRadius, tubeHeight, 32, 1, true); const body = new THREE.Mesh(cylinderGeo, glassMaterial); body.castShadow = true;
+            const sphereGeo = new THREE.SphereGeometry(tubeRadius, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2); const bottom = new THREE.Mesh(sphereGeo, glassMaterial); bottom.rotation.x = Math.PI; bottom.position.y = -tubeHeight / 2; bottom.castShadow = true;
+            group.add(body); group.add(bottom);
+            if (isInteractive) { const hitGeo = new THREE.CylinderGeometry(tubeRadius * 1.5, tubeRadius * 1.5, tubeHeight + tubeRadius, 16); const hitMat = new THREE.MeshBasicMaterial({ visible: false }); const hitMesh = new THREE.Mesh(hitGeo, hitMat); hitMesh.position.y = -tubeRadius/2; hitMesh.name = "dragTarget"; group.add(hitMesh); }
+            return group;
+        }
+        function createLiquid(height, material) {
+            const group = new THREE.Group(); const liqRadius = tubeRadius * 0.92; const cylGeo = new THREE.CylinderGeometry(liqRadius, liqRadius, height, 32); const cyl = new THREE.Mesh(cylGeo, material); cyl.position.y = height / 2;
+            const sphGeo = new THREE.SphereGeometry(liqRadius, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2); const sph = new THREE.Mesh(sphGeo, material); sph.rotation.x = Math.PI;
+            group.add(cyl); group.add(sph); cyl.position.y = height / 2; sph.position.y = 0;
+            const wrapper = new THREE.Group(); wrapper.add(group); group.position.y = 0.02; return { mesh: wrapper, cyl: cyl, height: height, radius: liqRadius };
+        }
+        const tube1Group = new THREE.Group(); tube1Group.position.set(tube1X, baseTubeY, 0); const glass1 = createTestTube(false); tube1Group.add(glass1);
+        const h1_initial = tubeHeight * 0.25; const liquid1 = createLiquid(h1_initial, liquid1Material); liquid1.mesh.position.y = -tubeHeight / 2; tube1Group.add(liquid1.mesh); scene.add(tube1Group);
+        const tube2Group = new THREE.Group(); tube2Group.position.set(tube2StartX, baseTubeY, 0); const glass2 = createTestTube(true); tube2Group.add(glass2);
+        const h2_initial = tubeHeight * 0.55; const liquid2 = createLiquid(h2_initial, liquid2Material); liquid2.mesh.position.y = -tubeHeight / 2; tube2Group.add(liquid2.mesh); scene.add(tube2Group);
+        const droplets = []; const dropGeo = new THREE.SphereGeometry(0.08, 16, 16); const dropMat = clearLiquidMaterial.clone();
+        const maxParticles = 6000; const particlesGeo = new THREE.BufferGeometry(); const particlePositions = new Float32Array(maxParticles * 3); const particleLifetimes = new Float32Array(maxParticles);
+        for(let i=0; i<maxParticles; i++) { particlePositions[i*3+1] = -1000; particleLifetimes[i] = 0; }
+        particlesGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3)); particlesGeo.setAttribute('lifetime', new THREE.BufferAttribute(particleLifetimes, 1));
+        const particleMat = new THREE.ShaderMaterial({ uniforms: { color: { value: new THREE.Color(0xffffff) } }, vertexShader: `attribute float lifetime; varying float vAlpha; void main() { vAlpha = min(lifetime, 0.95); vec4 mvPosition = modelViewMatrix * vec4(position, 1.0); gl_PointSize = 12.0 * (10.0 / -mvPosition.z); gl_Position = projectionMatrix * mvPosition; }`, fragmentShader: `uniform vec3 color; varying float vAlpha; void main() { vec2 xy = gl_PointCoord.xy - vec2(0.5); float ll = length(xy); if(ll > 0.5) discard; float alpha = (0.5 - ll) * 2.0 * vAlpha; gl_FragColor = vec4(color, alpha); }`, transparent: true, depthWrite: false, blending: THREE.NormalBlending });
+        const particleSystem = new THREE.Points(particlesGeo, particleMat); particleSystem.frustumCulled = false; scene.add(particleSystem);
+        const particleData = []; let activeParticlesCount = 0;
+        const raycaster = new THREE.Raycaster(); const mouse = new THREE.Vector2(); let isDragging = false, isPouring = false; const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0); let dragOffset = new THREE.Vector3();
+        renderer.domElement.addEventListener('pointerdown', (e) => {
+            if (isPouring) return;
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1; mouse.y = -(e.clientY / window.innerHeight) * 2 + 1; raycaster.setFromCamera(mouse, camera);
+            const targetObj = tube2Group.getObjectByName("dragTarget");
+            if (targetObj && raycaster.intersectObjects([targetObj]).length > 0) { e.stopPropagation(); isDragging = true; controls.enabled = false; raycaster.ray.intersectPlane(dragPlane, dragOffset); dragOffset.sub(tube2Group.position); document.body.style.cursor = 'grabbing'; }
+        }, true);
+        renderer.domElement.addEventListener('pointermove', (e) => {
+            if (!isDragging) return; e.stopPropagation();
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1; mouse.y = -(e.clientY / window.innerHeight) * 2 + 1; raycaster.setFromCamera(mouse, camera);
+            const intersectPoint = new THREE.Vector3(); raycaster.ray.intersectPlane(dragPlane, intersectPoint); tube2Group.position.copy(intersectPoint.sub(dragOffset));
+            if (tube2Group.position.y < baseTubeY) tube2Group.position.y = baseTubeY;
+            const targetMouthWorld = new THREE.Vector3(tube1X + tubeRadius * 0.2, baseTubeY + tubeHeight / 2 + 0.2, 0); const currentMouthWorld = new THREE.Vector3(0, tubeHeight / 2, 0).applyMatrix4(tube2Group.matrixWorld);
+            if (currentMouthWorld.distanceTo(targetMouthWorld) < 2.0) { startPouringSequence(); }
+        }, true);
+        renderer.domElement.addEventListener('pointerup', (e) => {
+            if (isDragging) { e.stopPropagation(); isDragging = false; controls.enabled = true; document.body.style.cursor = 'grab'; if (!isPouring) { new TWEEN.Tween(tube2Group.position).to({ x: tube2StartX, y: baseTubeY, z: 0 }, 500).easing(TWEEN.Easing.Elastic.Out).start(); } }
+        }, true);
+        let currentH1 = h1_initial; let currentH2 = h2_initial;
+        function startPouringSequence() {
+            isDragging = false; isPouring = true; controls.enabled = true; const pourAngle = Math.PI / 2.2;
+            const targetMouthWorld = new THREE.Vector3(tube1X + tubeRadius * 0.2, baseTubeY + tubeHeight / 2 + 0.2, 0);
+            const localMouth = new THREE.Vector3(0, tubeHeight / 2, 0); const euler = new THREE.Euler(0, 0, pourAngle); const rotatedMouthOffset = localMouth.clone().applyEuler(euler);
+            const pourPos = targetMouthWorld.clone().sub(rotatedMouthOffset);
+            new TWEEN.Tween(tube2Group.position).to({ x: pourPos.x, y: pourPos.y, z: pourPos.z }, 500).easing(TWEEN.Easing.Quadratic.Out).start();
+            new TWEEN.Tween(tube2Group.rotation).to({ z: pourAngle }, 500).easing(TWEEN.Easing.Quadratic.InOut).onComplete(() => {
+                let pourTimer = 0;
+                const pourInterval = setInterval(() => {
+                    pourTimer += 100; if (pourTimer > 2000) { clearInterval(pourInterval); finishPouring(); return; }
+                    const drop = new THREE.Mesh(dropGeo, dropMat); const localLip = new THREE.Vector3(-tubeRadius * 0.7, tubeHeight / 2, 0); const mouthWorldPos = localLip.applyMatrix4(tube2Group.matrixWorld);
+                    drop.position.set(mouthWorldPos.x + (Math.random()-0.5)*0.05, mouthWorldPos.y, mouthWorldPos.z + (Math.random()-0.5)*0.05); scene.add(drop); droplets.push({ mesh: drop, vy: 0 });
+                    currentH2 -= (h2_initial * 0.8) / 20; liquid2.cyl.scale.y = Math.max(0.01, currentH2 / h2_initial); liquid2.cyl.position.y = currentH2 / 2;
+                }, 100);
+            }).start();
+        }
+        function finishPouring() { new TWEEN.Tween(tube2Group.rotation).to({ z: 0 }, 800).easing(TWEEN.Easing.Quadratic.InOut).start(); new TWEEN.Tween(tube2Group.position).to({ x: tube2StartX, y: baseTubeY, z: 0 }, 800).easing(TWEEN.Easing.Quadratic.InOut).start(); }
+        function triggerTurbidityReaction(hitPosition) {
+            currentH1 += 0.05; liquid1.cyl.scale.y = currentH1 / h1_initial; liquid1.cyl.position.y = currentH1 / 2;
+            liquid1Material.color.lerp(new THREE.Color(0xffffff), 0.1); liquid1Material.transmission = Math.max(0.5, liquid1Material.transmission - 0.05); liquid1Material.roughness = Math.min(0.3, liquid1Material.roughness + 0.05);
+            const newParticles = 400; const tubeBottomY = tube1Group.position.y - tubeHeight/2; const tubeLiquidTopY = tubeBottomY + currentH1;
+            for(let i=0; i<newParticles; i++) {
+                if (activeParticlesCount >= maxParticles) break; const idx = activeParticlesCount;
+                const r = tubeRadius * 0.85 * Math.sqrt(Math.random()); const theta = Math.random() * 2 * Math.PI;
+                particlePositions[idx*3] = tube1X + r * Math.cos(theta); const yOffset = Math.random() * currentH1 * 0.9; particlePositions[idx*3+1] = tubeLiquidTopY - yOffset; particlePositions[idx*3+2] = r * Math.sin(theta);
+                particleLifetimes[idx] = 0.01;
+                particleData[idx] = { vx: (Math.random() - 0.5) * 0.05, vy: -(Math.random() * 0.02 + 0.01), vz: (Math.random() - 0.5) * 0.05 }; activeParticlesCount++;
+            }
+            particlesGeo.attributes.position.needsUpdate = true; particlesGeo.attributes.lifetime.needsUpdate = true;
+        }
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            isPouring = false; tube2Group.position.set(tube2StartX, baseTubeY, 0); tube2Group.rotation.z = 0;
+            currentH1 = h1_initial; liquid1.cyl.scale.y = 1; liquid1.cyl.position.y = h1_initial / 2;
+            liquid1Material.copy(clearLiquidMaterial);
+            currentH2 = h2_initial; liquid2.cyl.scale.y = 1; liquid2.cyl.position.y = h2_initial / 2;
+            droplets.forEach(d => scene.remove(d.mesh)); droplets.length = 0;
+            for(let i=0; i<maxParticles; i++) { particlePositions[i*3+1] = -1000; particleLifetimes[i] = 0; }
+            particlesGeo.attributes.position.needsUpdate = true; particlesGeo.attributes.lifetime.needsUpdate = true; activeParticlesCount = 0; document.querySelector('.drag-hint').style.display = 'block';
+        });
+        renderer.domElement.addEventListener('pointerdown', () => { const hint = document.querySelector('.drag-hint'); if(hint) hint.style.display = 'none'; }, {once: true, capture: true});
+        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+        const clock = new THREE.Clock(); const label1 = document.getElementById('label-tube1'); const label2 = document.getElementById('label-tube2'); const pos1 = new THREE.Vector3(); const pos2 = new THREE.Vector3();
+        function animate() {
+            requestAnimationFrame(animate); const dt = Math.min(clock.getDelta(), 0.1); TWEEN.update(); controls.update();
+            pos1.set(-0.8, tubeHeight / 4, 0); pos1.applyMatrix4(tube1Group.matrixWorld); pos1.project(camera);
+            if (pos1.z < 1) { label1.style.left = (pos1.x * 0.5 + 0.5) * window.innerWidth + 'px'; label1.style.top = (-(pos1.y * 0.5) + 0.5) * window.innerHeight + 'px'; label1.style.opacity = 1; } else { label1.style.opacity = 0; }
+            pos2.set(0.8, tubeHeight / 4, 0); pos2.applyMatrix4(tube2Group.matrixWorld); pos2.project(camera);
+            if (pos2.z < 1) { label2.style.left = (pos2.x * 0.5 + 0.5) * window.innerWidth + 'px'; label2.style.top = (-(pos2.y * 0.5) + 0.5) * window.innerHeight + 'px'; label2.style.opacity = 1; } else { label2.style.opacity = 0; }
+            const tube1LiquidTopY = tube1Group.position.y - tubeHeight/2 + currentH1;
+            for (let i = droplets.length - 1; i >= 0; i--) {
+                const d = droplets[i]; d.vy -= 15.0 * dt; d.mesh.position.y += d.vy * dt;
+                if (d.mesh.position.y < tube1LiquidTopY && Math.abs(d.mesh.position.x - tube1X) < tubeRadius) { triggerTurbidityReaction(d.mesh.position); scene.remove(d.mesh); droplets.splice(i, 1); } else if (d.mesh.position.y < -2) { scene.remove(d.mesh); droplets.splice(i, 1); }
+            }
+            if (activeParticlesCount > 0) {
+                const positions = particlesGeo.attributes.position.array; const lifetimes = particlesGeo.attributes.lifetime.array; const tubeBottomY = tube1Group.position.y - tubeHeight/2;
+                for (let i = 0; i < activeParticlesCount; i++) {
+                    const idx = i * 3; const pData = particleData[i];
+                    pData.vx += (Math.random() - 0.5) * 0.1 * dt; pData.vz += (Math.random() - 0.5) * 0.1 * dt; pData.vx *= 0.98; pData.vz *= 0.98;
+                    positions[idx] += pData.vx * dt; positions[idx+1] += pData.vy * dt; positions[idx+2] += pData.vz * dt;
+                    const dx = positions[idx] - tube1X; const dz = positions[idx+2]; const distToCenter = Math.sqrt(dx*dx + dz*dz);
+                    if (distToCenter > tubeRadius * 0.88) { positions[idx] = tube1X + (dx / distToCenter) * tubeRadius * 0.88; positions[idx+2] = (dz / distToCenter) * tubeRadius * 0.88; pData.vx *= -0.5; pData.vz *= -0.5; }
+                    let limitY = tubeBottomY; if (distToCenter < tubeRadius * 0.9) { const yOffset = Math.sqrt(Math.max(0, Math.pow(tubeRadius * 0.88, 2) - distToCenter * distToCenter)); limitY = tubeBottomY - yOffset + 0.05; }
+                    if (positions[idx+1] < limitY) { positions[idx+1] = limitY; pData.vy = 0; pData.vx = 0; pData.vz = 0; }
+                    if (lifetimes[i] < 1.0) lifetimes[i] += dt * 0.5;
+                }
+                particlesGeo.attributes.position.needsUpdate = true; particlesGeo.attributes.lifetime.needsUpdate = true;
+            }
+            renderer.render(scene, camera);
+        }
+        window.onload = () => animate();
+    </script>
+</body>
+</html>
+    </template>
+
+    <!-- 模块2: 新建 文本文档.html (电导率) -->
+    <template id="tpl-2">
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>3D 沉淀溶解平衡仿真实验 - 极简操作版</title>
+    <style>
+        #loadingScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #e2e8f0; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #1e293b; transition: opacity 0.6s ease; }
+        .spinner { width: 50px; height: 50px; border: 4px solid rgba(0, 0, 0, 0.1); border-top-color: #0ea5e9; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        .loading-text { font-size: 16px; letter-spacing: 2px; font-family: 'Segoe UI', sans-serif; color: #475569; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { background: #e2e8f0; margin: 0; padding: 0; overflow: hidden; width: 100vw; height: 100vh; }
+        #canvas3d { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; touch-action: none; }
+        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; padding: 20px; }
+        .interactive-ui { pointer-events: auto; }
+        .top-left-title { position: absolute; top: 30px; left: 40px; display: flex; flex-direction: column; gap: 5px; }
+        .main-title { font-size: 28px; font-weight: 800; color: #0f172a; letter-spacing: 2px; text-shadow: 0 4px 15px rgba(255,255,255,0.8); }
+        .top-right-panel { position: absolute; top: 30px; right: 40px; width: 480px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 10px 40px rgba(0,0,0,0.06); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .section-title { font-size: 15px; font-weight: bold; color: #333; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; font-family: 'SimSun', 'Songti SC', serif; }
+        .chart-wrapper { width: 100%; height: 260px; position: relative; background: #fff; border: 1px solid #333; padding: 5px; }
+        .live-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; animation: pulse 1.5s infinite; position: absolute; top: 12px; right: 12px; z-index: 10;}
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; box-shadow: 0 0 12px #10b981; } 100% { opacity: 0.4; } }
+        .bottom-action-bar { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 10px 40px rgba(0,0,0,0.08); border-radius: 16px; padding: 15px 25px; display: flex; flex-direction: row; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: center; }
+        .btn { padding: 12px 20px; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; gap: 8px; border: none; white-space: nowrap; }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .btn:active:not(:disabled) { transform: translateY(0); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+        .btn-primary { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .btn-primary:hover:not(:disabled) { background: #bae6fd; }
+        .btn-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .stirrer-toggle { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .stirrer-toggle.active { background: #dcfce7; color: #15803d; border-color: #bbf7d0; box-shadow: inset 0 0 10px rgba(21, 128, 61, 0.1); }
+        .toggle-icon { transition: transform 0.3s; font-size: 1.2rem; }
+        .stirrer-toggle.active .toggle-icon { animation: spin 0.5s linear infinite; }
+        #toast { position: absolute; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px); padding: 16px 32px; font-size: 1rem; font-weight: bold; color: #0f172a; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid #bae6fd; border-radius: 50px; box-shadow: 0 10px 30px rgba(2, 132, 199, 0.15); text-align: center; pointer-events: none; opacity: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000; letter-spacing: 0.5px; }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div id="canvas3d"></div>
+<div id="loadingScreen"><div class="spinner"></div><div class="loading-text" id="loading-msg">加载高精渲染引擎与物理流体...</div></div>
+<div class="ui-layer">
+    <div class="top-left-title"><div class="main-title">沉淀溶解平衡实验</div></div>
+    <div class="top-right-panel interactive-ui">
+        <div class="section-title" style="justify-content: center;">溶液电导率——时间 图</div>
+        <div class="chart-wrapper"><div class="live-dot" title="传感器采集中"></div><canvas id="chartCanvas"></canvas></div>
+    </div>
+    <div class="bottom-action-bar interactive-ui">
+        <button class="btn btn-primary" id="btn-add-agcl"><span>① 加入 1g AgCl 固体</span></button>
+        <button class="btn btn-primary" id="btn-add-water" disabled><span>② 注入 80mL 蒸馏水</span></button>
+        <div style="width: 1px; height: 30px; background: rgba(0,0,0,0.1); margin: 0 5px;"></div>
+        <button class="btn stirrer-toggle" id="btn-stirrer"><span id="stirrer-text">磁力搅拌：关闭</span><span class="toggle-icon">🌀</span></button>
+        <button class="btn btn-danger" id="btn-reset">🔄 重置</button>
+    </div>
+    <div id="toast"></div>
+</div>
+<script>
+function initApp() {
+    const SIMULATION = { volume: 100, solid_moles: 0, ag_moles: 0, cl_moles: 0, ksp: 1.0, base_cond: 21.8, ion_cond_factor: 17.2, time: 0, running: true, isStirring: false, stirIntensity: 0, suspendRatio: 0, turbidity: 0, lastSensorTime: 0 };
+    const SENSOR_FPS = 10; const CHART_SECONDS = 70; const MAX_DATA_POINTS = SENSOR_FPS * CHART_SECONDS; 
+    let chartLabels = []; let chartDataArray = [];
+    for(let i=0; i<MAX_DATA_POINTS; i++) { chartLabels.push(((i - MAX_DATA_POINTS) / SENSOR_FPS).toFixed(1)); chartDataArray.push(SIMULATION.base_cond + (Math.random() - 0.5) * 0.8); }
+    Chart.defaults.font.family = "'SimSun', 'Songti SC', serif";
+    const ctxChart = document.getElementById('chartCanvas').getContext('2d');
+    const conductivityChart = new Chart(ctxChart, {
+        type: 'line', data: { labels: chartLabels, datasets: [{ label: '电导率', data: chartDataArray, borderColor: '#b91c1c', backgroundColor: '#b91c1c', borderWidth: 1.2, pointRadius: 1.5, pointHoverRadius: 2, fill: false, tension: 0.05 }] },
+        options: { responsive: true, maintainAspectRatio: false, animation: { duration: 0 }, layout: { padding: { left: 10, right: 20, top: 10, bottom: 5 } },
+            scales: { y: { min: 0, max: 50, grid: { color: 'rgba(34, 197, 94, 0.25)', tickLength: 5 }, ticks: { stepSize: 10, color: '#000', font: {size: 12} }, title: { display: true, text: '电导率探头<uc / cm>', color: '#000', font: {size: 14, weight: 'bold'} } }, 
+                x: { display: true, grid: { color: 'rgba(34, 197, 94, 0.25)' }, ticks: { color: '#000', font: {size: 12}, callback: function(val, index) { let sec = parseFloat(this.getLabelForValue(val)); if (sec >= 0 && sec % 10 === 0 && Math.abs(sec - Math.round(sec)) < 0.1) { return Math.round(sec); } return ''; } }, title: { display: true, text: '时间<秒>', color: '#000', font: {size: 14, weight: 'bold'} } } }, 
+            plugins: { tooltip: { enabled: false }, legend: { display: false } } }
+    });
+    const scene = new THREE.Scene(); scene.background = new THREE.Color(0xe2e8f0); scene.fog = new THREE.FogExp2(0xe2e8f0, 0.012);
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000); let targetCamPos = new THREE.Vector3(0, 18, 45); let targetLookAt = new THREE.Vector3(0, 4, 0); let isAutoCamera = true; camera.position.copy(targetCamPos);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(window.devicePixelRatio); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; document.getElementById('canvas3d').appendChild(renderer.domElement);
+    const controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.maxPolarAngle = Math.PI / 2 - 0.02; controls.target.copy(targetLookAt); controls.addEventListener('start', () => { isAutoCamera = false; });
+    scene.add(new THREE.AmbientLight(0xffffff, 0.65)); const mainLight = new THREE.DirectionalLight(0xffffff, 0.8); mainLight.position.set(15, 30, 20); mainLight.castShadow = true; mainLight.shadow.mapSize.width = 1024; mainLight.shadow.mapSize.height = 1024; mainLight.shadow.bias = -0.0005; scene.add(mainLight);
+    const rimLightLeft = new THREE.DirectionalLight(0xffffff, 1.2); rimLightLeft.position.set(-20, 10, -20); scene.add(rimLightLeft); const rimLightRight = new THREE.DirectionalLight(0xbae6fd, 1.0); rimLightRight.position.set(20, 10, -20); scene.add(rimLightRight);
+    const apparatus = new THREE.Group(); scene.add(apparatus);
+    const table = new THREE.Mesh(new THREE.CylinderGeometry(30, 30, 1, 64), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 })); table.position.y = -0.5; table.receiveShadow = true; apparatus.add(table);
+    function createBeakerScaleTexture() { const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024; const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, 1024, 1024); ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)'; ctx.lineWidth = 6; ctx.font = 'bold 50px "Segoe UI", Arial, sans-serif'; ctx.fillText('250 ml', 350, 150); ctx.font = 'bold 28px "Segoe UI", Arial, sans-serif'; ctx.fillText('APPROX.', 350, 200); function drawTick(ml, isMajor) { const h3D = 0.15 + (ml / 100) * 5; const y2D = 1024 - (h3D / 18) * 1024; ctx.beginPath(); if (isMajor) { ctx.moveTo(350, y2D); ctx.lineTo(430, y2D); ctx.stroke(); ctx.font = 'bold 45px "Segoe UI", Arial, sans-serif'; ctx.fillText(ml.toString(), 250, y2D + 15); } else { ctx.moveTo(380, y2D); ctx.lineTo(430, y2D); ctx.stroke(); } } drawTick(50, true); drawTick(75, false); drawTick(100, true); drawTick(125, false); drawTick(150, true); drawTick(175, false); drawTick(200, true); drawTick(225, false); drawTick(250, true); const tex = new THREE.CanvasTexture(canvas); tex.anisotropy = renderer.capabilities.getMaxAnisotropy(); return tex; }
+    const glassMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: 0.96, opacity: 1, transparent: true, roughness: 0.05, ior: 1.52, thickness: 0.5, clearcoat: 1.0, clearcoatRoughness: 0.05, side: THREE.DoubleSide, depthWrite: false }); const beakerGroup = new THREE.Group(); const beakerBody = new THREE.Mesh(new THREE.CylinderGeometry(7.5, 7.5, 18, 64, 1, true), glassMat); beakerBody.position.y = 9; const beakerRim = new THREE.Mesh(new THREE.TorusGeometry(7.55, 0.25, 32, 64), glassMat); beakerRim.rotation.x = Math.PI / 2; beakerRim.position.y = 18; const beakerBottom = new THREE.Mesh(new THREE.CylinderGeometry(7.5, 7.5, 0.3, 64), glassMat); beakerBottom.position.y = 0.15; beakerGroup.add(beakerBody, beakerRim, beakerBottom); apparatus.add(beakerGroup);
+    const scaleTex = createBeakerScaleTexture(); const scaleMat = new THREE.MeshBasicMaterial({ map: scaleTex, transparent: true, opacity: 0.95, depthWrite: false, side: THREE.DoubleSide }); const scaleMesh = new THREE.Mesh(new THREE.CylinderGeometry(7.52, 7.52, 18, 64, 1, true), scaleMat); scaleMesh.position.y = 9; scaleMesh.rotation.y = -Math.PI / 2.5; apparatus.add(scaleMesh);
+    const waterGeo = new THREE.CylinderGeometry(7.4, 7.4, 1, 64, 4); waterGeo.translate(0, 0.5, 0); const waterOrigY = new Float32Array(waterGeo.attributes.position.count); for(let i=0; i<waterGeo.attributes.position.count; i++) waterOrigY[i] = waterGeo.attributes.position.getY(i); const waterMat = new THREE.MeshPhysicalMaterial({ color: 0x38bdf8, transmission: 0.85, opacity: 1, transparent: true, roughness: 0.05, depthWrite: false }); const waterMesh = new THREE.Mesh(waterGeo, waterMat); waterMesh.position.y = 0.3; waterMesh.scale.y = 5; apparatus.add(waterMesh);
+    const solidMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1.0, metalness: 0 }); const solidMesh = new THREE.Mesh(new THREE.SphereGeometry(2.8, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), solidMat); solidMesh.position.y = 0.3; solidMesh.scale.set(1, 0, 1); solidMesh.visible = false; solidMesh.castShadow = true; apparatus.add(solidMesh);
+    const stirrer = new THREE.Group(); const stirrerMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.2 }); const sBody = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2.0, 16), stirrerMat); sBody.rotation.z = Math.PI / 2; const sCap1 = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), stirrerMat); sCap1.position.x = 1.0; const sCap2 = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), stirrerMat); sCap2.position.x = -1.0; stirrer.add(sBody, sCap1, sCap2); stirrer.position.set(0, 0.5, 0); stirrer.castShadow = true; apparatus.add(stirrer);
+    const pCount = 2500; const pGeo = new THREE.BufferGeometry(); const pPos = new Float32Array(pCount * 3); const pData = []; for(let i=0; i<pCount; i++){ pPos[i*3]=0; pPos[i*3+1]=0; pPos[i*3+2]=0; pData.push({ radius: Math.random() * 6.5, angle: Math.random() * Math.PI * 2, heightRatio: Math.random(), speed: 0.05 + Math.random() * 0.1 }); } pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3)); const pMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.35, transparent: true, opacity: 0, depthWrite: false }); const particleSys = new THREE.Points(pGeo, pMat); apparatus.add(particleSys);
+    window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+    const btnReset = document.getElementById('btn-reset'); const btnAgcl = document.getElementById('btn-add-agcl'); const btnWater = document.getElementById('btn-add-water'); const btnStirrer = document.getElementById('btn-stirrer'); const stirrerText = document.getElementById('stirrer-text'); const toast = document.getElementById('toast');
+    let toastTimeout; function showToast(msg, duration = 4000) { toast.innerHTML = msg; toast.classList.add('show'); if(toastTimeout) clearTimeout(toastTimeout); toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, duration); }
+    function updateBtnState(step) { btnAgcl.disabled = step !== 0; btnWater.disabled = step !== 1; }
+    btnStirrer.addEventListener('click', () => { SIMULATION.isStirring = !SIMULATION.isStirring; if (SIMULATION.isStirring) { btnStirrer.classList.add('active'); stirrerText.innerText = "磁力搅拌：开启"; } else { btnStirrer.classList.remove('active'); stirrerText.innerText = "磁力搅拌：关闭"; } });
+    btnReset.addEventListener('click', () => { SIMULATION.volume = 100; SIMULATION.solid_moles = 0; SIMULATION.ag_moles = 0; SIMULATION.cl_moles = 0; SIMULATION.time = 0; SIMULATION.turbidity = 0; SIMULATION.suspendRatio = 0; SIMULATION.stirIntensity = 0; for(let i=0; i<MAX_DATA_POINTS; i++) { chartDataArray[i] = SIMULATION.base_cond + (Math.random() - 0.5) * 0.8; chartLabels[i] = ((i - MAX_DATA_POINTS) / SENSOR_FPS).toFixed(1); } conductivityChart.update(); updateBtnState(0); showToast("实验已重置。请点击【① 加入 AgCl】开始测量。", 4000); targetCamPos.set(0, 18, 45); targetLookAt.set(0, 4, 0); isAutoCamera = true; });
+    btnAgcl.addEventListener('click', () => { SIMULATION.turbidity = 0.3; SIMULATION.time = 0; for(let i=0; i<MAX_DATA_POINTS; i++) { chartLabels[i] = ((i - MAX_DATA_POINTS) / SENSOR_FPS).toFixed(1); } new TWEEN.Tween(SIMULATION).to({solid_moles: 3000}, 1000).easing(TWEEN.Easing.Quadratic.Out).start(); updateBtnState(1); showToast("💡 <b>沉淀溶解：</b>粉末落水，电导率将平缓上升形成 S型曲线，并稳定在 39 左右。", 5000); targetCamPos.set(0, 10, 30); targetLookAt.set(0, 2, 0); isAutoCamera = true; });
+    btnWater.addEventListener('click', () => { SIMULATION.volume += 80; updateBtnState(2); showToast("💡 <b>稀释与再平衡：</b> 注入 80ml 清水。<br>电导率骤降形成 <b>“V”型坑 (约降至31)</b>，随后继续微量溶解回升。", 6000); targetCamPos.set(0, 16, 35); targetLookAt.set(0, 5, 0); isAutoCamera = true; });
+    let lastTime = performance.now();
+    function animate() {
+        requestAnimationFrame(animate); TWEEN.update(); if (isAutoCamera) { camera.position.lerp(targetCamPos, 0.04); controls.target.lerp(targetLookAt, 0.04); } controls.update();
+        const now = performance.now(); const dt = now - lastTime; lastTime = now;
+        if (SIMULATION.isStirring) { stirrer.rotation.y -= 0.35; SIMULATION.stirIntensity += (1.0 - SIMULATION.stirIntensity) * 0.05; SIMULATION.suspendRatio += (1.0 - SIMULATION.suspendRatio) * 0.02; } else { SIMULATION.stirIntensity += (0.0 - SIMULATION.stirIntensity) * 0.05; SIMULATION.suspendRatio += (0.0 - SIMULATION.suspendRatio) * 0.02; }
+        if (SIMULATION.turbidity > 0) { SIMULATION.turbidity -= 0.0015; if(SIMULATION.turbidity < 0) SIMULATION.turbidity = 0; }
+        if (SIMULATION.running && dt > 0) {
+            let conc_ag = SIMULATION.ag_moles / SIMULATION.volume; let conc_cl = SIMULATION.cl_moles / SIMULATION.volume; let Qc = conc_ag * conc_cl; let rate_moles = 0;
+            if (Qc < SIMULATION.ksp && SIMULATION.solid_moles > 0) { let target_ag = Math.sqrt(SIMULATION.ksp); let deficit = target_ag - conc_ag; if (deficit > 0) { let speedMult = SIMULATION.isStirring ? 0.3 : 0.08; rate_moles = deficit * SIMULATION.volume * speedMult * (dt / 1000); if (rate_moles > SIMULATION.solid_moles) rate_moles = SIMULATION.solid_moles; } } else if (Qc > SIMULATION.ksp) { let target_ag = SIMULATION.ksp / conc_cl; let excess = conc_ag - target_ag; let speedMult = SIMULATION.isStirring ? 0.4 : 0.15; if (excess > 0) rate_moles = -excess * SIMULATION.volume * speedMult * (dt / 1000); }
+            SIMULATION.ag_moles += rate_moles; SIMULATION.cl_moles += rate_moles; SIMULATION.solid_moles -= rate_moles; if (SIMULATION.ag_moles < 0) SIMULATION.ag_moles = 0; if (SIMULATION.solid_moles < 0) SIMULATION.solid_moles = 0;
+        }
+        if (now - SIMULATION.lastSensorTime > (1000 / SENSOR_FPS)) {
+            SIMULATION.lastSensorTime = now; let ion_concentration = SIMULATION.ag_moles / SIMULATION.volume; let ion_cond_contribution = ion_concentration * SIMULATION.ion_cond_factor; let sensor_noise = (Math.random() - 0.5) * 0.9; let current_cond = SIMULATION.base_cond + ion_cond_contribution + sensor_noise;
+            chartDataArray.push(current_cond); chartDataArray.shift(); SIMULATION.time += (1.0 / SENSOR_FPS); chartLabels.push(SIMULATION.time.toFixed(1)); chartLabels.shift(); conductivityChart.update();
+        }
+        let display_g = SIMULATION.solid_moles / 3000; const waterColorClear = new THREE.Color(0x38bdf8); const waterColorMilky = new THREE.Color(0xffffff); waterMat.color.lerpColors(waterColorClear, waterColorMilky, SIMULATION.turbidity); waterMat.transmission = 0.85 - (SIMULATION.turbidity * 0.85); 
+        const targetWaterH = (SIMULATION.volume / 100) * 5; waterMesh.scale.y += (targetWaterH - waterMesh.scale.y) * 0.1;
+        const posAttr = waterGeo.attributes.position; const maxDip = SIMULATION.stirIntensity * 0.18; for(let i=0; i<posAttr.count; i++) { let origY = waterOrigY[i]; if (origY > 0.9) { let x = posAttr.getX(i); let z = posAttr.getZ(i); let dist = Math.sqrt(x*x + z*z); let dip = Math.max(0, (1 - dist/7.4)) * maxDip; posAttr.setY(i, origY - dip); } } posAttr.needsUpdate = true;
+        let pileRatio = 1.0 - SIMULATION.suspendRatio; let pileG = display_g * pileRatio; let targetSolidH = pileG * 0.5; if (pileG <= 0.05) { solidMesh.visible = false; targetSolidH = 0; } else { solidMesh.visible = true; if (targetSolidH < 0.05) targetSolidH = 0.05; } solidMesh.scale.y += (targetSolidH - solidMesh.scale.y) * 0.2;
+        let stirrerTargetY = 0.3 + (2.8 * solidMesh.scale.y) + 0.35; if (pileG <= 0.05) stirrerTargetY = 0.3 + 0.35; stirrer.position.y += (stirrerTargetY - stirrer.position.y) * 0.2;
+        let activeParticles = Math.floor(pCount * (display_g > 0 ? 1 : 0) * (SIMULATION.suspendRatio + SIMULATION.turbidity));
+        if (activeParticles > 0) {
+            pMat.opacity = Math.min(0.85, pMat.opacity + 0.02); const pPositions = particleSys.geometry.attributes.position.array; let currentWaterWorldHeight = waterMesh.scale.y; 
+            for(let i=0; i<pCount; i++) {
+                if (i > activeParticles) { pPositions[i*3+1] = -10; continue; }
+                let data = pData[i]; let angSpeed = data.speed * (1 + SIMULATION.stirIntensity * (1 - data.radius/7)); data.angle -= angSpeed;
+                let currentRadius = data.radius * (1 - SIMULATION.stirIntensity * 0.3 * (1 - data.heightRatio)); let px = currentRadius * Math.cos(data.angle); let pz = currentRadius * Math.sin(data.angle); let ph = 0.3 + (data.heightRatio * currentWaterWorldHeight * SIMULATION.suspendRatio) + (Math.sin((now/1000) * 0.5 + i) * 0.2 * SIMULATION.stirIntensity);
+                if (SIMULATION.turbidity > 0) { ph += (Math.random() - 0.5) * SIMULATION.turbidity * 5; px += (Math.random() - 0.5) * SIMULATION.turbidity * 2; pz += (Math.random() - 0.5) * SIMULATION.turbidity * 2; if(ph > currentWaterWorldHeight) ph = currentWaterWorldHeight - 0.2; }
+                pPositions[i*3] = px; pPositions[i*3+1] = ph; pPositions[i*3+2] = pz;
+            }
+            particleSys.geometry.attributes.position.needsUpdate = true;
+        } else { pMat.opacity = Math.max(0, pMat.opacity - 0.05); }
+        renderer.render(scene, camera);
+    }
+    document.getElementById('loadingScreen').style.opacity = '0'; setTimeout(()=> { document.getElementById('loadingScreen').remove(); }, 600); animate();
+}
+window.onload = initApp;
+</script>
+</body>
+</html>
+    </template>
+
+    <!-- 模块3: 水合离子.html (微观交换) -->
+    <template id="tpl-3">
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>3D沉淀溶解平衡 - 真实分子级水合交换仿真</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Microsoft YaHei', sans-serif; background-color: #020617; }
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
+        #ui-panel { position: absolute; top: 20px; left: 20px; background: rgba(15, 23, 42, 0.85); padding: 24px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); width: 320px; pointer-events: auto; backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); color: #f8fafc; }
+        h2 { margin-top: 0; color: #60a5fa; font-size: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px;}
+        .desc { font-size: 13px; color: #cbd5e1; line-height: 1.6; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border-left: 3px solid #60a5fa;}
+        .legend-container { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
+        .legend { display: flex; align-items: center; margin-bottom: 12px; font-size: 13px; font-weight: 500; color: #e2e8f0; }
+        .legend:last-child { margin-bottom: 0; }
+        .color-sphere { width: 16px; height: 16px; border-radius: 50%; margin-right: 12px; box-shadow: inset -3px -3px 6px rgba(0,0,0,0.5); flex-shrink: 0; }
+        #bottom-controls { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; pointer-events: auto; z-index: 10; }
+        .btn { display: block; width: auto; padding: 14px 30px; margin-bottom: 0; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; color: white; transition: all 0.3s ease; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); white-space: nowrap; }
+        .btn-start { background: linear-gradient(135deg, #0ea5e9, #2563eb); } .btn-start:hover { background: linear-gradient(135deg, #0284c7, #1d4ed8); transform: scale(1.02); }
+        .btn-isotope { background: linear-gradient(135deg, #ef4444, #b91c1c); } .btn-isotope:hover { background: linear-gradient(135deg, #dc2626, #991b1b); transform: scale(1.02); } .btn-isotope:disabled { background: #334155; color: #64748b; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-reset { background: linear-gradient(135deg, #64748b, #475569); } .btn-reset:hover { background: linear-gradient(135deg, #475569, #334155); transform: scale(1.02); }
+        #data-panel { display: none; position: absolute; top: 20px; right: 20px; background: rgba(15, 23, 42, 0.85); border-radius: 16px; padding: 20px; width: 380px; border: 1px solid rgba(248, 113, 113, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(12px); color: #f8fafc; pointer-events: auto; }
+        .data-title { font-size: 13px; color: #94a3b8; margin-bottom: 10px; display: flex; justify-content: space-between;}
+        #geiger-text { font-family: monospace; font-size: 32px; color: #f87171; font-weight: bold; text-align: left; margin: 0;}
+        .unit { font-size: 14px; color: #cbd5e1; font-weight: normal;}
+        #rad-chart { width: 100%; height: 90px; margin-top: 15px; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.2); border-left: 1px solid rgba(255,255,255,0.2);}
+        .chart-desc { margin-top: 15px; font-size: 13px; color: #10b981; font-weight: bold; line-height: 1.6;}
+        .hint { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: rgba(255,255,255,0.8); padding: 10px 24px; border-radius: 30px; font-size: 13px; pointer-events: none; letter-spacing: 1px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
+    <div id="ui-panel">
+        <h2>🔬 微观实质</h2>
+        <div class="desc"><b>动态平衡</b>：在宏观静止的表象下，每当有一个离子被水分子包裹溶解（离开晶体），在同一瞬间必定有一个同种离子脱去水合层沉积下来（填补空位）。</div>
+        <div class="legend-container">
+            <div class="legend"><div class="color-sphere" style="background:#3b82f6;"></div> 水合银离子 (Ag⁺)</div>
+            <div class="legend"><div class="color-sphere" style="background:#10b981;"></div> 水合氯离子 (Cl⁻)</div>
+            <div class="legend"><div class="color-sphere" style="background:#f87171; box-shadow: 0 0 12px #f87171;"></div> 放射性同位素 (¹¹⁰ᵐAg)</div>
+        </div>
+    </div>
+    <div id="bottom-controls">
+        <button id="btn-toggle" class="btn btn-start">▶ 启动微观动态平衡观测</button>
+        <button id="btn-isotope" class="btn btn-isotope" disabled>☢ 标记全部固相银离子追踪交换</button>
+        <button id="btn-reset" class="btn btn-reset">🔄 重置</button>
+    </div>
+    <div id="data-panel">
+        <div class="data-title"><span>γ射线闪烁计数器</span><span style="color:#f87171;">● 溶液相采样中</span></div>
+        <div id="geiger-text"><span id="rad-count">0000</span> <span class="unit">CPS (次/秒)</span></div>
+        <canvas id="rad-chart" width="380" height="90"></canvas>
+        <div class="chart-desc">结论：原本在晶体中的放射性同位素，现已随微观溶解过程分布在溶液中。</div>
+    </div>
+    <div class="hint">🖱️ 左键拖动全方位观察 | ⚙️ 滚轮放大看清水分子排布</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        const scene = new THREE.Scene(); scene.background = new THREE.Color(0x020617); scene.fog = new THREE.FogExp2(0x020617, 0.003);
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.set(0, 35, 75);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(window.devicePixelRatio); document.body.appendChild(renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.maxPolarAngle = Math.PI / 2 + 0.1; controls.target.set(0, 10, 0);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6)); const pLight1 = new THREE.PointLight(0xffffff, 0.8); pLight1.position.set(20, 40, 20); scene.add(pLight1); const pLight2 = new THREE.PointLight(0x93c5fd, 0.5); pLight2.position.set(-20, 20, -20); scene.add(pLight2);
+        const ionRadius = 1.5; const sphereGeo = new THREE.SphereGeometry(ionRadius, 32, 32);
+        const matAg = new THREE.MeshPhysicalMaterial({ color: 0x3b82f6, metalness: 0.2, roughness: 0.1, clearcoat: 1.0 }); const matCl = new THREE.MeshPhysicalMaterial({ color: 0x10b981, metalness: 0.1, roughness: 0.2, clearcoat: 1.0 }); const matAgStar = new THREE.MeshPhysicalMaterial({ color: 0xffaaaa, metalness: 0.1, roughness: 0.1, emissive: 0xff0000, emissiveIntensity: 0.8, clearcoat: 1.0 });
+        const matO = new THREE.MeshPhysicalMaterial({ color: 0xef4444, metalness: 0.1, roughness: 0.2 }); const matH = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0.1, roughness: 0.3 }); const geoO = new THREE.SphereGeometry(0.55, 16, 16); const geoH = new THREE.SphereGeometry(0.35, 16, 16);
+        const waterGeo = new THREE.BoxGeometry(60, 45, 60); const waterMat = new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.05, depthWrite: false }); const waterBox = new THREE.Mesh(waterGeo, waterMat); waterBox.position.y = 22.5; scene.add(waterBox);
+        function createHydrationShell(ionType) {
+            const shellGroup = new THREE.Group(); const shellRadius = ionRadius + 0.6;
+            const positions = [ new THREE.Vector3(shellRadius, 0, 0), new THREE.Vector3(-shellRadius, 0, 0), new THREE.Vector3(0, shellRadius, 0), new THREE.Vector3(0, -shellRadius, 0), new THREE.Vector3(0, 0, shellRadius), new THREE.Vector3(0, 0, -shellRadius), ];
+            positions.forEach(pos => {
+                const h2o = new THREE.Group(); const o = new THREE.Mesh(geoO, matO); const h1 = new THREE.Mesh(geoH, matH); const h2 = new THREE.Mesh(geoH, matH);
+                o.position.set(0,0,0); h2o.add(o); h2o.add(h1); h2o.add(h2); h2o.position.copy(pos); h2o.lookAt(0, 0, 0);
+                if (ionType === 'Ag' || ionType === 'AgStar') { h1.position.set(0.4, 0.3, 0.4); h2.position.set(-0.4, -0.3, 0.4); } else { h1.position.set(0.4, 0.3, -0.5); h2.position.set(-0.4, -0.3, -0.5); }
+                h2o.userData.targetPos = pos.clone(); h2o.userData.direction = pos.clone().normalize(); h2o.userData.targetQuaternion = h2o.quaternion.clone(); h2o.userData.scatterAxis = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize(); h2o.userData.scatterAngle = (Math.random() - 0.5) * Math.PI * 6;
+                shellGroup.add(h2o);
+            });
+            return shellGroup;
+        }
+        const particles = []; const gridVacancies = []; const latticeSpacing = 3.6;
+        function createParticle(type, isAqueous, startPos) {
+            const group = new THREE.Group(); group.position.copy(startPos); const ionMesh = new THREE.Mesh(sphereGeo, type === 'Ag' ? matAg : (type === 'Cl' ? matCl : matAgStar)); group.add(ionMesh);
+            const shellGroup = createHydrationShell(type); shellGroup.visible = isAqueous; shellGroup.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0); group.add(shellGroup); scene.add(group);
+            return { group: group, ionMesh: ionMesh, shellGroup: shellGroup, type: type, state: isAqueous ? 'aqueous' : 'solid', gridPos: isAqueous ? null : startPos.clone(), velocity: isAqueous ? new THREE.Vector3((Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2) : new THREE.Vector3(0,0,0) };
+        }
+        function generateParticles() {
+            particles.forEach(p => scene.remove(p.group)); particles.length = 0; gridVacancies.length = 0;
+            for(let x = -1; x <= 2; x++) { for(let z = -1; z <= 2; z++) { for(let y = 0; y <= 3; y++) {
+                const isAg = Math.abs(x + y + z) % 2 === 0; const type = isAg ? 'Ag' : 'Cl'; const pos = new THREE.Vector3(x * latticeSpacing - (latticeSpacing/2), y * latticeSpacing + (latticeSpacing/2), z * latticeSpacing - (latticeSpacing/2));
+                if(y <= 2) { particles.push(createParticle(type, false, pos)); } else { gridVacancies.push({ pos: pos, type: type }); }
+            }}}
+            for(let i = 0; i < 5; i++) { ['Ag', 'Cl'].forEach(type => { particles.push(createParticle(type, true, new THREE.Vector3((Math.random() - 0.5) * 25, 15 + Math.random() * 20, (Math.random() - 0.5) * 25))); }); }
+        }
+        generateParticles();
+        let isRunning = false; let hasIsotope = false; const activeExchanges = [];
+        function triggerSlowExchange(aqType) {
+            const aqCandidates = particles.filter(p => p.state === 'aqueous' && (p.type === aqType || (aqType==='Ag' && p.type==='AgStar')));
+            const sldCandidates = particles.filter(p => p.state === 'solid' && (p.type === aqType || (aqType==='Ag' && p.type==='AgStar')));
+            const validVacancies = gridVacancies.filter(v => v.type === aqType);
+            if(aqCandidates.length > 0 && sldCandidates.length > 0 && validVacancies.length > 0) {
+                const aqP = aqCandidates[Math.floor(Math.random() * aqCandidates.length)]; sldCandidates.sort((a,b) => b.gridPos.y - a.gridPos.y); const sldP = sldCandidates[Math.floor(Math.random() * Math.min(6, sldCandidates.length))];
+                const targetVac = validVacancies[Math.floor(Math.random() * validVacancies.length)]; aqP.state = 'exchanging'; sldP.state = 'exchanging';
+                const precipitateTargetPos = targetVac.pos.clone(); const dissolveTargetPos = new THREE.Vector3(sldP.gridPos.x + (Math.random()-0.5)*12, sldP.gridPos.y + 12, sldP.gridPos.z + (Math.random()-0.5)*12);
+                gridVacancies.splice(gridVacancies.indexOf(targetVac), 1); gridVacancies.push({ pos: sldP.gridPos.clone(), type: aqType });
+                activeExchanges.push({ progress: 0, aqP: aqP, sldP: sldP, startAqPos: aqP.group.position.clone(), startSldPos: sldP.gridPos.clone(), targetGridPos: precipitateTargetPos, dissolveTargetPos: dissolveTargetPos });
+            }
+        }
+        const btnToggle = document.getElementById('btn-toggle'); const btnIsotope = document.getElementById('btn-isotope'); const btnReset = document.getElementById('btn-reset'); const dataPanel = document.getElementById('data-panel'); const radCount = document.getElementById('rad-count'); const chartCanvas = document.getElementById('rad-chart'); const ctx = chartCanvas.getContext('2d'); const historyData = []; const maxDataPoints = 80;
+        btnToggle.addEventListener('click', () => { isRunning = !isRunning; if(isRunning) { btnToggle.innerHTML = '⏸ 暂停微观运动'; btnToggle.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)'; if(!hasIsotope) btnIsotope.disabled = false; } else { btnToggle.innerHTML = '▶ 启动微观动态平衡观测'; btnToggle.style.background = 'linear-gradient(135deg, #0ea5e9, #2563eb)'; btnIsotope.disabled = true; } });
+        btnIsotope.addEventListener('click', () => { if(hasIsotope || !isRunning) return; particles.forEach(p => { if(p.state === 'solid' && p.type === 'Ag') { p.type = 'AgStar'; p.ionMesh.material = matAgStar; } }); hasIsotope = true; btnIsotope.disabled = true; btnIsotope.innerHTML = '☢ 固相 Ag⁺ 已全部替换为 ¹¹⁰ᵐAg'; btnIsotope.style.background = 'rgba(255,255,255,0.1)'; dataPanel.style.display = 'block'; });
+        btnReset.addEventListener('click', () => { isRunning = false; hasIsotope = false; activeExchanges.length = 0; frame = 0; btnToggle.innerHTML = '▶ 启动微观动态平衡观测'; btnToggle.style.background = 'linear-gradient(135deg, #0ea5e9, #2563eb)'; btnIsotope.disabled = true; btnIsotope.innerHTML = '☢ 标记全部固相银离子追踪交换'; btnIsotope.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)'; dataPanel.style.display = 'none'; radCount.innerText = '0000'; historyData.length = 0; ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height); generateParticles(); });
+        function drawChart() {
+            ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height); ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)'; ctx.lineWidth = 1; for(let i = 0; i < chartCanvas.width; i += 20) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, chartCanvas.height); ctx.stroke(); } for(let i = 0; i < chartCanvas.height; i += 15) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(chartCanvas.width, i); ctx.stroke(); }
+            if(historyData.length === 0) return; ctx.beginPath(); ctx.strokeStyle = '#f87171'; ctx.lineWidth = 2; ctx.lineJoin = 'round'; const maxVal = Math.max(...historyData, 300);
+            for(let i = 0; i < historyData.length; i++) { const x = (i / (maxDataPoints - 1)) * chartCanvas.width; const y = chartCanvas.height - 5 - (historyData[i] / maxVal) * (chartCanvas.height - 10); if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); } ctx.stroke();
+            const lastX = ((historyData.length - 1) / (maxDataPoints - 1)) * chartCanvas.width; const lastY = chartCanvas.height - 5 - (historyData[historyData.length-1] / maxVal) * (chartCanvas.height - 10); ctx.beginPath(); ctx.arc(lastX, lastY, 4, 0, Math.PI*2); ctx.fillStyle = '#f87171'; ctx.fill();
+        }
+        let frame = 0;
+        function animate() {
+            requestAnimationFrame(animate); controls.update();
+            if(isRunning) {
+                frame++; let isotopeInSolution = 0;
+                particles.forEach(p => {
+                    if(p.shellGroup.visible) { p.shellGroup.rotation.x += 0.005; p.shellGroup.rotation.y += 0.008; }
+                    if(p.state === 'aqueous') {
+                        p.group.position.add(p.velocity); if(p.type === 'AgStar') isotopeInSolution++; p.group.position.add(new THREE.Vector3((Math.random()-0.5)*0.08, (Math.random()-0.5)*0.08, (Math.random()-0.5)*0.08));
+                        if(p.group.position.x > 25 || p.group.position.x < -25) p.velocity.x *= -1; if(p.group.position.z > 25 || p.group.position.z < -25) p.velocity.z *= -1; if(p.group.position.y > 40) p.velocity.y *= -1; if(p.group.position.y < 16) { p.velocity.y *= -1; p.group.position.y = 16; }
+                        if(Math.random() < 0.05) { p.velocity.add(new THREE.Vector3((Math.random()-0.5)*0.08, (Math.random()-0.5)*0.08, (Math.random()-0.5)*0.08)); p.velocity.clampLength(0, 0.15); }
+                    } else if(p.state === 'solid') { p.group.position.set( p.gridPos.x + (Math.random()-0.5)*0.1, p.gridPos.y + (Math.random()-0.5)*0.1, p.gridPos.z + (Math.random()-0.5)*0.1 ); }
+                });
+                if(hasIsotope && frame % 20 === 0) { const baseActivity = isotopeInSolution * 120 + 45; const noise = (Math.random() + Math.random() + Math.random() - 1.5) * Math.sqrt(baseActivity) * 1.5; const measuredCPS = Math.max(0, Math.floor(baseActivity + noise)); radCount.innerText = measuredCPS.toString().padStart(4, '0'); historyData.push(measuredCPS); if(historyData.length > maxDataPoints) historyData.shift(); drawChart(); }
+                if(frame % 150 === 0 && activeExchanges.length < 3) { triggerSlowExchange(Math.random() > 0.5 ? 'Ag' : 'Cl'); }
+                for(let i = activeExchanges.length - 1; i >= 0; i--) {
+                    const ex = activeExchanges[i]; ex.progress += 0.003;
+                    if(ex.progress >= 1) {
+                        ex.aqP.state = 'solid'; ex.aqP.gridPos = ex.targetGridPos; ex.aqP.group.position.copy(ex.targetGridPos); ex.aqP.shellGroup.visible = false; ex.aqP.shellGroup.children.forEach(h2o => { h2o.position.copy(h2o.userData.targetPos); h2o.quaternion.copy(h2o.userData.targetQuaternion); });
+                        ex.sldP.state = 'aqueous'; ex.sldP.group.position.copy(ex.dissolveTargetPos); ex.sldP.velocity = new THREE.Vector3((Math.random()-0.5)*0.15, (Math.random()-0.5)*0.15, (Math.random()-0.5)*0.15); ex.sldP.shellGroup.visible = true; ex.sldP.shellGroup.children.forEach(h2o => { h2o.position.copy(h2o.userData.targetPos); h2o.quaternion.copy(h2o.userData.targetQuaternion); });
+                        activeExchanges.splice(i, 1);
+                    } else {
+                        const prog = ex.progress; let precipitateMoveProg = 0; let scatterFactor = 0;
+                        if (prog < 0.6) { precipitateMoveProg = prog / 0.6; precipitateMoveProg = -(Math.cos(Math.PI * precipitateMoveProg) - 1) / 2; scatterFactor = 0; } else { precipitateMoveProg = 1; scatterFactor = (prog - 0.6) / 0.4; scatterFactor = -(Math.cos(Math.PI * scatterFactor) - 1) / 2; }
+                        const aqPos = new THREE.Vector3().lerpVectors(ex.startAqPos, ex.targetGridPos, precipitateMoveProg); if (precipitateMoveProg < 1) { aqPos.y += Math.sin(Math.PI * precipitateMoveProg) * 4; } ex.aqP.group.position.copy(aqPos); ex.aqP.shellGroup.visible = true;
+                        ex.aqP.shellGroup.children.forEach(h2o => { const dir = h2o.userData.direction; h2o.position.copy(h2o.userData.targetPos).add(dir.clone().multiplyScalar(scatterFactor * 8)); h2o.quaternion.copy(h2o.userData.targetQuaternion); const qRot = new THREE.Quaternion().setFromAxisAngle(h2o.userData.scatterAxis, scatterFactor * h2o.userData.scatterAngle * 0.4); h2o.quaternion.multiply(qRot); });
+                        let ionMoveProg = 0; let gatherFactor = 0;
+                        if (prog < 0.4) { ionMoveProg = 0; gatherFactor = 1 - (prog / 0.4); gatherFactor = -(Math.cos(Math.PI * gatherFactor) - 1) / 2; } else { ionMoveProg = (prog - 0.4) / 0.6; ionMoveProg = -(Math.cos(Math.PI * ionMoveProg) - 1) / 2; gatherFactor = 0; }
+                        const sldPos = new THREE.Vector3().lerpVectors(ex.startSldPos, ex.dissolveTargetPos, ionMoveProg); if (ionMoveProg > 0) { sldPos.y += Math.sin(Math.PI * ionMoveProg) * 4; } ex.sldP.group.position.copy(sldPos); ex.sldP.shellGroup.visible = true;
+                        ex.sldP.shellGroup.children.forEach(h2o => { const dir = h2o.userData.direction; h2o.position.copy(h2o.userData.targetPos).add(dir.clone().multiplyScalar(gatherFactor * 8)); h2o.quaternion.copy(h2o.userData.targetQuaternion); const qRot = new THREE.Quaternion().setFromAxisAngle(h2o.userData.scatterAxis, gatherFactor * h2o.userData.scatterAngle * 0.4); h2o.quaternion.multiply(qRot); });
+                    }
+                }
+            } renderer.render(scene, camera);
+        }
+        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+        animate();
+    </script>
+</body>
+</html>
+    </template>
+
+    <!-- 模块4: 同位素.html -->
+    <template id="tpl-4">
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>同位素示踪法探究</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Microsoft YaHei', sans-serif; background-color: #e2e8f0; }
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
+        #ui-panel { position: absolute; top: 20px; left: 20px; pointer-events: auto; }
+        h2 { margin-top: 0; color: #1e293b; font-size: 26px; display: flex; align-items: center; gap: 8px; font-weight: bold; text-shadow: 0 2px 6px rgba(0,0,0,0.15);}
+        #bottom-controls { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; pointer-events: auto; z-index: 10; }
+        .btn { display: block; width: auto; padding: 14px 24px; margin-bottom: 0; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; color: white; transition: all 0.3s ease; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); white-space: nowrap; }
+        .btn-add { background: linear-gradient(135deg, #f43f5e, #be123c); } .btn-add:hover { background: linear-gradient(135deg, #e11d48, #9f1239); transform: scale(1.02); } .btn-add:disabled { background: #334155; color: #64748b; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-monitor { background: linear-gradient(135deg, #10b981, #047857); } .btn-monitor:hover { background: linear-gradient(135deg, #059669, #065f46); transform: scale(1.02); } .btn-monitor:disabled { background: #334155; color: #64748b; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-reset { background: linear-gradient(135deg, #64748b, #475569); } .btn-reset:hover { background: linear-gradient(135deg, #475569, #334155); transform: scale(1.02); }
+        #data-panel { position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.85); border-radius: 16px; padding: 20px; width: 380px; border: 1px solid rgba(248, 113, 113, 0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.08); backdrop-filter: blur(12px); color: #1e293b; pointer-events: auto; }
+        .data-title { font-size: 13px; color: #64748b; margin-bottom: 10px; display: flex; justify-content: space-between;}
+        #status-dot { color: #64748b; transition: color 0.3s; } #status-dot.active { color: #ef4444; animation: blink 1s infinite; } @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        #geiger-text { font-family: monospace; font-size: 36px; color: #ef4444; font-weight: bold; text-align: left; margin: 0; text-shadow: 0 0 10px rgba(239,68,68,0.2);}
+        .unit { font-size: 14px; color: #64748b; font-weight: normal;}
+        #rad-chart { width: 100%; height: 120px; margin-top: 15px; background: rgba(248,250,252,0.6); border-bottom: 1px solid rgba(0,0,0,0.1); border-left: 1px solid rgba(0,0,0,0.1); border-radius: 4px;}
+        .chart-desc { margin-top: 15px; font-size: 13.5px; color: #0284c7; font-weight: normal; line-height: 1.6;}
+        .hint { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.85); color: #334155; padding: 10px 24px; border-radius: 30px; font-size: 13px; pointer-events: none; letter-spacing: 1px; backdrop-filter: blur(4px); border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.05); font-weight: 500; }
+        #labels-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 5; }
+        .floating-label { position: absolute; background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(0, 0, 0, 0.08); color: #1e293b; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; transform: translate(-50%, -100%); margin-top: -10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: opacity 0.3s ease-in-out; opacity: 0; white-space: nowrap; }
+        .floating-label::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -6px; border-width: 6px; border-style: solid; border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent; }
+    </style>
+</head>
+<body>
+    <div id="ui-panel"><h2>⚗️ 同位素示踪法探究</h2></div>
+    <div id="bottom-controls">
+        <button id="btn-add" class="btn btn-add">1. 滴加放射性 ¹¹⁰ᵐAgCl 固体</button>
+        <button id="btn-monitor" class="btn btn-monitor" disabled>2. 开启溶液放射性实时监测</button>
+        <button id="btn-reset" class="btn btn-reset">🔄 重置实验</button>
+    </div>
+    <div id="data-panel">
+        <div class="data-title">
+            <span>γ射线盖革计数器 (溶液相) <span id="sound-toggle" style="cursor:pointer; margin-left:4px;" title="点击开启/关闭音效">🔊</span><span style="color:#fcd34d; font-size:11px; margin-left:5px;">(⚠️ 已加速)</span></span>
+            <span id="status-dot">● 待机中</span>
+        </div>
+        <div id="geiger-text"><span id="rad-count">0032</span> <span class="unit">CPM (次/分)</span></div>
+        <canvas id="rad-chart" width="380" height="120"></canvas>
+        <div class="chart-desc" id="conclusion-text" style="opacity: 0.6;">当前结论：实验准备中... (仅检测到环境本底辐射)</div>
+    </div>
+    <div class="hint">🖱️ 左键拖动全方位观察烧杯 | ⚙️ 滚轮缩放</div>
+    <div id="labels-container"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        window.onload = function () {
+            const scene = new THREE.Scene(); scene.background = new THREE.Color(0xe2e8f0); scene.fog = new THREE.FogExp2(0xe2e8f0, 0.005);
+            const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.set(0, 30, 80);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(window.devicePixelRatio); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; document.body.appendChild(renderer.domElement);
+            const controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.maxPolarAngle = Math.PI / 2 + 0.1; controls.target.set(0, 5, 0);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.4)); const spotLight = new THREE.SpotLight(0xffffff, 1.2); spotLight.position.set(20, 60, 20); spotLight.angle = Math.PI / 6; spotLight.penumbra = 0.5; spotLight.castShadow = true; scene.add(spotLight); const pLight2 = new THREE.PointLight(0x38bdf8, 0.6); pLight2.position.set(-20, 20, -20); scene.add(pLight2);
+            const tableGeo = new THREE.BoxGeometry(120, 2, 80); const tableMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9, metalness: 0.05 }); const table = new THREE.Mesh(tableGeo, tableMat); table.position.y = -16; table.receiveShadow = true; scene.add(table);
+            const equipmentGroup = new THREE.Group(); scene.add(equipmentGroup);
+            const beakerRadius = 15; const beakerHeight = 35; const beakerGeo = new THREE.CylinderGeometry(beakerRadius, beakerRadius, beakerHeight, 32, 1, true); const beakerMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: 0.9, opacity: 1, transparent: true, roughness: 0.05, ior: 1.5, thickness: 0.5, side: THREE.DoubleSide }); const beaker = new THREE.Mesh(beakerGeo, beakerMat); beaker.position.y = beakerHeight / 2 - 15; beaker.castShadow = true; equipmentGroup.add(beaker);
+            const beakerBottomGeo = new THREE.CylinderGeometry(beakerRadius, beakerRadius, 0.5, 32); const beakerBottom = new THREE.Mesh(beakerBottomGeo, beakerMat); beakerBottom.position.y = -15; equipmentGroup.add(beakerBottom);
+            const liquidRadius = 14.5; const liquidHeight = 22; const liquidGeo = new THREE.CylinderGeometry(liquidRadius, liquidRadius, liquidHeight, 32); const liquidMat = new THREE.MeshPhysicalMaterial({ color: 0xbae6fd, transmission: 0.8, opacity: 0.7, transparent: true, roughness: 0.1, ior: 1.33 }); const liquid = new THREE.Mesh(liquidGeo, liquidMat); liquid.position.y = liquidHeight / 2 - 14.5; equipmentGroup.add(liquid);
+            const probeGeo = new THREE.CylinderGeometry(1.2, 1.2, 20, 16); const probeMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.3 }); const probe = new THREE.Mesh(probeGeo, probeMat); probe.position.set(8, 15, 0); equipmentGroup.add(probe);
+            const wireCurve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(8, 25, 0), new THREE.Vector3(20, 35, 0), new THREE.Vector3(40, -15, 0)); const wireGeo = new THREE.TubeGeometry(wireCurve, 20, 0.4, 8, false); const wireMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 }); const wire = new THREE.Mesh(wireGeo, wireMat); equipmentGroup.add(wire);
+            const particles = []; const particleGeo = new THREE.SphereGeometry(0.4, 8, 8); const particleMat = new THREE.MeshPhysicalMaterial({ color: 0xffaaaa, emissive: 0xf43f5e, emissiveIntensity: 1.5, roughness: 0.4, metalness: 0.1 });
+            const moundGeo = new THREE.SphereGeometry(8, 32, 16); const mound = new THREE.Mesh(moundGeo, particleMat); mound.scale.set(1, 0.1, 1); mound.position.set(0, -14.5, 0); mound.visible = false; equipmentGroup.add(mound);
+            let solidAdded = false; let isMonitoring = false;
+            const labelsContainer = document.getElementById('labels-container');
+            const sceneLabels = [
+                { text: "γ射线盖革计数管探头", position: new THREE.Vector3(8, 26, 0), element: null, visible: () => true },
+                { text: "饱和 AgCl 溶液", position: new THREE.Vector3(-18, -3.5, 0), element: null, visible: () => true },
+                { text: "放射性 ¹¹⁰ᵐAgCl 固体", position: new THREE.Vector3(0, -14.5, 12), element: null, visible: () => solidAdded || mound.visible }
+            ];
+            sceneLabels.forEach(labelData => { const el = document.createElement('div'); el.className = 'floating-label'; el.innerHTML = labelData.text.replace('¹¹⁰ᵐAgCl', '<span style="color:#ef4444;">¹¹⁰ᵐAgCl</span>'); labelsContainer.appendChild(el); labelData.element = el; });
+            function dropParticles() { for (let i = 0; i < 150; i++) { const p = new THREE.Mesh(particleGeo, particleMat); p.position.set((Math.random() - 0.5) * 10, 30 + Math.random() * 15, (Math.random() - 0.5) * 10); p.userData.velocity = -0.3 - Math.random() * 0.4; p.userData.targetY = -14 + Math.random() * 1.5; scene.add(p); particles.push(p); } }
+            const btnAdd = document.getElementById('btn-add'); const btnMonitor = document.getElementById('btn-monitor'); const btnReset = document.getElementById('btn-reset'); const radCount = document.getElementById('rad-count'); const statusDot = document.getElementById('status-dot'); const conclusionText = document.getElementById('conclusion-text'); const soundToggle = document.getElementById('sound-toggle'); const chartCanvas = document.getElementById('rad-chart'); const ctx = chartCanvas.getContext('2d');
+            let historyData = []; const maxDataPoints = 100; let currentTrueCPM = 32; const LIMIT_CPM = 520;
+            function drawGrid() { ctx.strokeStyle = 'rgba(0, 0, 0, 0.06)'; ctx.lineWidth = 1; for(let i = 0; i < chartCanvas.width; i += 20) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, chartCanvas.height); ctx.stroke(); } for(let i = 0; i < chartCanvas.height; i += 20) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(chartCanvas.width, i); ctx.stroke(); } }
+            function drawChart() {
+                ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height); drawGrid(); const maxVal = 600; if(historyData.length === 0) return;
+                ctx.beginPath(); ctx.strokeStyle = '#f87171'; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+                for(let i = 0; i < historyData.length; i++) { const x = (i / (maxDataPoints - 1)) * chartCanvas.width; const y = chartCanvas.height - 10 - (historyData[i] / maxVal) * (chartCanvas.height - 20); if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); } ctx.stroke();
+                const lastX = ((historyData.length - 1) / (maxDataPoints - 1)) * chartCanvas.width; const lastY = chartCanvas.height - 10 - (historyData[historyData.length-1] / maxVal) * (chartCanvas.height - 20);
+                ctx.beginPath(); ctx.arc(lastX, lastY, 6, 0, Math.PI*2); ctx.fillStyle = 'rgba(248, 113, 113, 0.4)'; ctx.fill(); ctx.beginPath(); ctx.arc(lastX, lastY, 3, 0, Math.PI*2); ctx.fillStyle = '#ffffff'; ctx.fill();
+            }
+            for(let i=0; i<30; i++) { historyData.push(32 + (Math.random()-0.5)*5); } drawChart();
+            let audioCtx = null; let soundEnabled = true;
+            function playGeigerClick() { if (!soundEnabled || !audioCtx) return; if (audioCtx.state === 'suspended') audioCtx.resume(); const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.01); gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.01); osc.connect(gainNode); gainNode.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.01); }
+            soundToggle.addEventListener('click', () => { soundEnabled = !soundEnabled; soundToggle.innerText = soundEnabled ? '🔊' : '🔇'; soundToggle.style.opacity = soundEnabled ? 1 : 0.5; if(soundEnabled && !audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } });
+            btnAdd.addEventListener('click', () => { solidAdded = true; btnAdd.disabled = true; btnAdd.innerText = "✓ 已加入放射性固体"; dropParticles(); setTimeout(() => { btnMonitor.disabled = false; }, 2000); });
+            btnMonitor.addEventListener('click', () => { isMonitoring = true; btnMonitor.disabled = true; btnMonitor.innerText = "📈 正在实时监测溶液..."; if(!audioCtx && soundEnabled) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } statusDot.innerText = "● 监测进行中"; statusDot.classList.add('active'); conclusionText.style.opacity = 1; conclusionText.innerHTML = "监测中：<span style='color:#64748b;'>等待溶液相的放射性数据反馈...</span>"; });
+            btnReset.addEventListener('click', () => { solidAdded = false; isMonitoring = false; currentTrueCPM = 32; timePassed = 0; btnAdd.disabled = false; btnAdd.innerText = "1. 滴加放射性 ¹¹⁰ᵐAgCl 固体"; btnMonitor.disabled = true; btnMonitor.innerText = "2. 开启溶液放射性实时监测"; statusDot.innerText = "● 待机中"; statusDot.classList.remove('active'); conclusionText.style.opacity = 0.6; conclusionText.innerHTML = "当前结论：实验准备中... (仅检测到环境本底辐射)"; particles.forEach(p => scene.remove(p)); particles.length = 0; mound.visible = false; mound.scale.y = 0.1; historyData = []; for(let i=0; i<30; i++) historyData.push(32 + (Math.random()-0.5)*5); liquidMat.emissive.setHex(0x000000); });
+            let timePassed = 0; let frameCount = 0;
+            function animate() {
+                requestAnimationFrame(animate); controls.update(); frameCount++;
+                if (solidAdded) { let allSettled = true; particles.forEach(p => { if (p.position.y > p.userData.targetY) { p.position.y += p.userData.targetY > p.position.y ? 0 : p.userData.velocity; if(p.position.y < liquidHeight/2 - 14.5) { p.userData.velocity *= 0.95; } allSettled = false; } else { p.visible = false; } }); if (allSettled && !mound.visible && particles.length > 0) { mound.visible = true; particles.forEach(p => scene.remove(p)); particles.length = 0; } if (mound.visible && mound.scale.y < 0.6) { mound.scale.y += 0.01; } }
+                sceneLabels.forEach(labelData => { if (labelData.visible()) { const vector = labelData.position.clone(); vector.project(camera); if (vector.z < 1) { const x = (vector.x * 0.5 + 0.5) * window.innerWidth; const y = -(vector.y * 0.5 - 0.5) * window.innerHeight; labelData.element.style.left = `${x}px`; labelData.element.style.top = `${y}px`; labelData.element.style.opacity = 1; } else { labelData.element.style.opacity = 0; } } else { labelData.element.style.opacity = 0; } });
+                if (Math.random() < (currentTrueCPM / 3600)) { playGeigerClick(); }
+                if (frameCount % 10 === 0) {
+                    let displayCPM = currentTrueCPM + (Math.random() - 0.5) * Math.sqrt(currentTrueCPM) * 1.5;
+                    if (isMonitoring) {
+                        timePassed += 0.05; const k = 0.06; currentTrueCPM = 32 + (LIMIT_CPM - 32) * (1 - Math.exp(-k * timePassed));
+                        const ratio = (currentTrueCPM - 32) / (LIMIT_CPM - 32); liquidMat.emissive.setHex(0x550000); liquidMat.emissiveIntensity = ratio * 0.8;
+                        if (currentTrueCPM > 100 && currentTrueCPM < 450) { conclusionText.innerHTML = "监测中：溶液放射性<span style='color:#ef4444; font-weight:bold;'>显著上升</span>，说明固体中的 ¹¹⁰ᵐAg⁺ 进入了溶液！"; } else if (currentTrueCPM >= 450) { conclusionText.innerHTML = "结论：放射性达到稳定。证明宏观饱和状态下，<span style='color:#059669; font-weight:bold;'>溶解和沉淀并未停止</span>，而是速率相等，即<b>动态平衡</b>。"; }
+                    }
+                    displayCPM = Math.max(0, Math.floor(displayCPM)); radCount.innerText = displayCPM.toString().padStart(4, '0'); historyData.push(displayCPM); if (historyData.length > maxDataPoints) { historyData.shift(); } drawChart();
+                }
+                renderer.render(scene, camera);
+            }
+            window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+            animate();
+        };
+    </script>
+</body>
+</html>
+    </template>
+
+    <!-- 逻辑控制 -->
+    <script>
+        const simFrame = document.getElementById('sim-frame');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        function switchModule(index, btnElement) {
+            // 更新导航栏状态
+            navItems.forEach(item => item.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            // 显示加载遮罩
+            loadingOverlay.style.opacity = '1';
+            
+            // 使用标准的 HTML5 template 标签提取内容，避免正则和反斜杠转义引发语法错误
+            const template = document.getElementById(`tpl-${index}`);
+            const rawHtml = template.innerHTML;
+
+            // 延迟注入 Iframe，给 UI 渲染和过渡动画时间
+            setTimeout(() => {
+                // 利用 srcdoc 建立沙箱，百分之百隔离彼此的样式与 JS 环境
+                simFrame.srcdoc = rawHtml;
+                
+                // 等待 Iframe 加载完成后隐藏遮罩
+                simFrame.onload = () => {
+                    setTimeout(() => {
+                        loadingOverlay.style.opacity = '0';
+                    }, 200);
+                };
+            }, 300);
+        }
+
+        // 初始化：默认加载第一个实验
+        window.addEventListener('DOMContentLoaded', () => {
+            switchModule(1, navItems[0]);
+        });
+    </script>
+</body>
+</html>
